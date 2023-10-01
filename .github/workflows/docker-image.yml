@@ -61,7 +61,7 @@ jobs:
         file: ./Dockerfile
         platforms: linux/amd64
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/discordsoundboard:test2
+        tags: ${{ secrets.DOCKER_USERNAME }}/discordsoundboard:test3
 
 #    - name: Build the Docker image
 #      run: docker build . --file Dockerfile --tag r0ckR/discordsoundboard:$(date +%s)
