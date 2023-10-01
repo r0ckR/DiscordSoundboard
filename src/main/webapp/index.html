@@ -131,6 +131,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.4.1/js/bootstrap.bundle.min.js" integrity="sha256-OUFW7hFO0/r5aEGTQOz9F/aXQOt+TwqI1Z4fbVvww04=" crossorigin="anonymous"></script>
 <script type="text/javascript">
+    var soundsByCategory = {};
+
     $(function() {
         var category = 'All';
 
@@ -169,6 +171,15 @@
             $('a[data-category]').removeClass('active');
             $('a[data-category="' + category + '"]').addClass('active');
             $('#more').toggleClass('active', $('a[data-category].active:visible').closest('#more').length > 0);
+            // Hide or show the category headers based on the selected category in the navigation
+            $('.category-header').each(function() {
+                var headerCategory = $(this).data('category');
+                if (category === 'All' || category === headerCategory) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
             filterSounds($('#search').val());
         }).on('input', '#search', function(){
             // Search sound by name
@@ -234,6 +245,32 @@
             var today = new Date();
             var lastWeek = Date.parse(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7));
             $.each(soundObjects, function(i, obj) {
+                // Extract the category from the soundFileId
+                var 
+
+                // Check if the category contains an underscore; if not, set it to "Other"
+                if (category.indexOf('_') === -1) {
+                    category = 'Other';
+                } else {
+                    category = obj.soundFileId.split('_')[0];
+                }
+
+                // Check if the category header exists; if not, create it
+                if (!soundsByCategory[category]) {
+                    soundsByCategory[category] = [];
+                }
+
+                // Push the sound object into the corresponding category
+                soundsByCategory[category].push(obj);
+
+                
+
+                // If the category header doesn't exist, create it
+                if (!$('.category-header[data-category="' + category + '"]').length) {
+                    $('#sounds').append('<div class="category-header" data-category="' + category + '">' + category + '</div>');
+                }
+
+
                 var recentClass = '';
                 var recentItem = top10ByDate.filter(e => e.soundFileId === obj.soundFileId);
                 if (recentItem.length > 0) {
@@ -241,8 +278,23 @@
                         recentClass = '<span class="recentBadge" title="Recently Added"></span>';
                     }
                 }
-                $('#sounds').append('<div id="' + obj.soundFileId + '" class="button btn btn-secondary m-1" class="btn btn-secondary m-1" data-category="' + obj.category + '"><span class="content" title="Times Played: ' + obj.timesPlayed + '">' + obj.soundFileId + '</span>' + recentClass + '</div>');
+                 // If the category is "Other," append the sound button to the "Other" category
+                if (category === 'Other') {
+                    $('#Other').append('<div id="' + obj.soundFileId + '" class="button btn btn-secondary m-1" class="btn btn-secondary m-1" data-category="' + obj.category + '"><span class="content" title="Times Played: ' + obj.timesPlayed + '">' + obj.soundFileId + '</span>' + recentClass + '</div>');
+                } else {
+                    // Append the sound button to the corresponding category
+                    $('#' + category).append('<div id="' + obj.soundFileId + '" class="button btn btn-secondary m-1" class="btn btn-secondary m-1" data-category="' + obj.category + '"><span class="content" title="Times Played: ' + obj.timesPlayed + '">' + obj.soundFileId + '</span>' + recentClass + '</div>');
+                }
+                //old: $('#sounds').append('<div id="' + obj.soundFileId + '" class="button btn btn-secondary m-1" class="btn btn-secondary m-1" data-category="' + obj.category + '"><span class="content" title="Times Played: ' + obj.timesPlayed + '">' + obj.soundFileId + '</span>' + recentClass + '</div>');
             });
+        });
+
+        // Hide the category headers with no sounds
+        $('.category-header').each(function() {
+            var category = $(this).data('category');
+            if (!soundsByCategory[category] || soundsByCategory[category].length === 0) {
+                $(this).hide();
+            }
         });
 
         // Get users
